@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/jx-dev-org-mikec/mikeimport1:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/jx-dev-org-mikec/mikeimport1:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: mikeimport1
+        chartPath: charts/mikeimport1
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/jx-dev-org-mikec/mikeimport1'
+          image.tag: '{{.DIGEST_HEX}}'
